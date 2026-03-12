@@ -1,10 +1,22 @@
 function UserCard({ name, email }) {
-  // ดึงตัวอักษรแรกมาทำ avatar
+  // 🎨 1. Logic สำหรับเลือกสีตามตัวอักษรแรก
+  const getAvatarColor = (name) => {
+    const firstChar = name.charAt(0).toUpperCase();
+    const charCode = firstChar.charCodeAt(0);
+
+    // ตรวจสอบช่วง ASCII Code (A-G: 65-71, H-N: 72-78)
+    if (charCode >= 65 && charCode <= 71) return "#3182ce"; // Blue
+    if (charCode >= 72 && charCode <= 78) return "#38a169"; // Green
+    return "#805ad5"; // Purple (O-Z และอื่นๆ)
+  };
+
+  // 🆔 2. สร้างตัวอักษรย่อ (Initials)
   const initials = name
     .split(" ")
     .map((n) => n[0])
     .join("");
 
+  // 🚀 3. Return UI เพียงก้อนเดียวที่รวมทุกอย่างไว้แล้ว
   return (
     <div
       style={{
@@ -22,7 +34,7 @@ function UserCard({ name, email }) {
         style={{
           width: "40px",
           height: "40px",
-          background: "#1e40af",
+          background: getAvatarColor(name), // 🔥 ใช้ Function เลือกสีตรงนี้!
           color: "white",
           borderRadius: "50%",
           display: "flex",

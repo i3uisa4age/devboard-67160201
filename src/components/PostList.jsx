@@ -1,12 +1,21 @@
 import { useState } from "react";
 import PostCard from "./PostCard";
+import PostSkeleton from "./PostSkeleton";
+
+// Component ย่อยสำหรับนับจำนวนโพสต์ (Challenge ระดับ 1)
+function PostCount({ count }) {
+  return (
+    <div style={{ marginBottom: "1rem", color: "#4a5568", fontWeight: "500" }}>
+      โพสต์ทั้งหมด: {count} รายการ
+    </div>
+  );
+}
 
 function PostList({ posts, favorites, onToggleFavorite }) {
   const [search, setSearch] = useState("");
 
-  // กรองโพสต์ตาม search
   const filtered = posts.filter((post) =>
-    post.title.toLowerCase().includes(search.toLowerCase()),
+    post.title?.toLowerCase().includes(search.toLowerCase()),
   );
 
   return (
@@ -21,7 +30,8 @@ function PostList({ posts, favorites, onToggleFavorite }) {
         โพสต์ล่าสุด
       </h2>
 
-      {/* Search Input */}
+      <PostCount count={filtered.length} />
+
       <input
         type="text"
         placeholder="ค้นหาโพสต์..."
@@ -38,23 +48,24 @@ function PostList({ posts, favorites, onToggleFavorite }) {
         }}
       />
 
-      {/* ถ้าไม่พบโพสต์ */}
-      {filtered.length === 0 && (
+      {/* Logic ลำดับการแสดงผล: Skeleton -> Not Found -> List */}
+      {posts.length === 0 ? (
+        <PostSkeleton />
+      ) : filtered.length === 0 ? (
         <p style={{ color: "#718096", textAlign: "center", padding: "2rem" }}>
           ไม่พบโพสต์ที่ค้นหา
         </p>
+      ) : (
+        filtered.map((post) => (
+          <PostCard
+            key={post.id}
+            title={post.title}
+            body={post.body}
+            isFavorite={favorites.includes(post.id)}
+            onToggleFavorite={() => onToggleFavorite(post.id)}
+          />
+        ))
       )}
-
-      {/* แสดงรายการโพสต์ */}
-      {filtered.map((post) => (
-        <PostCard
-          key={post.id}
-          title={post.title}
-          body={post.body}
-          isFavorite={favorites.includes(post.id)}
-          onToggleFavorite={() => onToggleFavorite(post.id)}
-        />
-      ))}
     </div>
   );
 }

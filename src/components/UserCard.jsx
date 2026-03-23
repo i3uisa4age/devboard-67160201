@@ -1,68 +1,58 @@
-import { useState } from "react";
-import { Link } from "react-router-dom";
-import { useFavorites } from "../context/FavoritesContext";
-import CommentList from "./CommentList";
+function UserCard({ name, email }) {
+  const getAvatarColor = (name) => {
+    // ป้องกันกรณีไม่มีชื่อส่งมา
+    if (!name) return "#805ad5";
 
-function PostCard({ post }) {
-  const { favorites, toggleFavorite } = useFavorites();
-  const isFavorite = favorites.includes(post.id);
-  const [showComments, setShowComments] = useState(false);
+    const firstChar = name.charAt(0).toUpperCase();
+    const charCode = firstChar.charCodeAt(0);
+    if (charCode >= 65 && charCode <= 71) return "#3182ce"; // Blue
+    if (charCode >= 72 && charCode <= 78) return "#38a169"; // Green
+    return "#805ad5"; // Purple
+  };
+
+  const initials = name
+    ? name
+        .split(" ")
+        .map((n) => n[0])
+        .join("")
+        .substring(0, 2)
+    : "?";
 
   return (
     <div
       style={{
+        display: "flex",
+        alignItems: "center",
+        gap: "1rem",
         border: "1px solid #e2e8f0",
         borderRadius: "8px",
-        padding: "1rem",
-        marginBottom: "1rem",
+        padding: "0.75rem 1rem",
+        marginBottom: "0.75rem",
         background: "white",
       }}
     >
-      <h3 style={{ margin: "0 0 0.5rem" }}>
-        <Link
-          to={`/posts/${post.id}`}
-          style={{ color: "#1e40af", textDecoration: "none" }}
-        >
-          {post.title}
-        </Link>
-      </h3>
-      <p style={{ margin: "0 0 0.75rem", color: "#4a5568", lineHeight: 1.6 }}>
-        {post.body}
-      </p>
-
-      <div style={{ display: "flex", gap: "0.5rem" }}>
-        <button
-          onClick={() => toggleFavorite(post.id)}
-          style={{
-            background: "none",
-            border: "none",
-            cursor: "pointer",
-            fontSize: "1rem",
-            color: isFavorite ? "#e53e3e" : "#a0aec0",
-          }}
-        >
-          {isFavorite ? "❤️" : "🤍"}
-        </button>
-
-        <button
-          onClick={() => setShowComments((prev) => !prev)}
-          style={{
-            background: "none",
-            border: "1px solid #e2e8f0",
-            cursor: "pointer",
-            fontSize: "0.9rem",
-            padding: "0.25rem 0.75rem",
-            borderRadius: "4px",
-            color: "#4a5568",
-          }}
-        >
-          {showComments ? "▲ ซ่อน" : "▼ ความคิดเห็น"}
-        </button>
+      <div
+        style={{
+          width: "40px",
+          height: "40px",
+          background: getAvatarColor(name),
+          color: "white",
+          borderRadius: "50%",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          fontWeight: "bold",
+          fontSize: "0.9rem",
+        }}
+      >
+        {initials}
       </div>
-
-      {showComments && <CommentList postId={post.id} />}
+      <div>
+        <strong style={{ display: "block", color: "#2d3748" }}>{name}</strong>
+        <span style={{ fontSize: "0.85rem", color: "#718096" }}>{email}</span>
+      </div>
     </div>
   );
 }
 
-export default PostCard;
+export default UserCard;

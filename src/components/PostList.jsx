@@ -3,7 +3,8 @@ import PostCard from "./PostCard";
 import PostCount from "./PostCount";
 import PostSkeleton from "./PostSkeleton";
 
-function PostList({ favorites, onToggleFavorite }) {
+function PostList() {
+  // 👈 ลบ Props ออกแล้ว
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -44,7 +45,6 @@ function PostList({ favorites, onToggleFavorite }) {
 
   return (
     <div>
-      {/* ⭐ ส่วนที่ 1: หัวข้อและปุ่ม (ส่วนนี้จะแสดงตลอดเวลา ไม่หายไปไหน) */}
       <div
         style={{
           display: "flex",
@@ -115,10 +115,9 @@ function PostList({ favorites, onToggleFavorite }) {
         }}
       />
 
-      {/* ⭐ ส่วนที่ 2: เนื้อหา (ย้าย if loading มาเช็คเฉพาะส่วนนี้) */}
       <div>
         {loading ? (
-          <PostSkeleton /> // แสดงสีเทาๆ เฉพาะตรงนี้ หัวข้อข้างบนจะไม่หายแล้ว!
+          <PostSkeleton />
         ) : sortedPosts.length === 0 ? (
           <p style={{ textAlign: "center", color: "#718096" }}>ไม่พบโพสต์</p>
         ) : (
@@ -126,9 +125,7 @@ function PostList({ favorites, onToggleFavorite }) {
             <PostCard
               key={post.id}
               post={post}
-              isFavorite={favorites.includes(post.id)}
-              onToggleFavorite={() => onToggleFavorite(post.id)}
-            />
+            /> /* 👈 ไม่ต้องส่ง Props เพิ่มแล้ว */
           ))
         )}
       </div>

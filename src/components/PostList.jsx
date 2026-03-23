@@ -4,7 +4,6 @@ import PostCount from "./PostCount";
 import PostSkeleton from "./PostSkeleton";
 
 function PostList() {
-  // 👈 ลบ Props ออกแล้ว
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -121,12 +120,7 @@ function PostList() {
         ) : sortedPosts.length === 0 ? (
           <p style={{ textAlign: "center", color: "#718096" }}>ไม่พบโพสต์</p>
         ) : (
-          sortedPosts.map((post) => (
-            <PostCard
-              key={post.id}
-              post={post}
-            /> /* 👈 ไม่ต้องส่ง Props เพิ่มแล้ว */
-          ))
+          sortedPosts.map((post) => <PostCard key={post.id} post={post} />)
         )}
       </div>
     </div>

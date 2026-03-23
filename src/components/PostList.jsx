@@ -1,36 +1,104 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import PostCard from "./PostCard";
+import PostCount from "./PostCount";
 import PostSkeleton from "./PostSkeleton";
 
-// Component ย่อยสำหรับนับจำนวนโพสต์ (Challenge ระดับ 1)
-function PostCount({ count }) {
-  return (
-    <div style={{ marginBottom: "1rem", color: "#4a5568", fontWeight: "500" }}>
-      โพสต์ทั้งหมด: {count} รายการ
-    </div>
-  );
-}
-
-function PostList({ posts, favorites, onToggleFavorite }) {
+function PostList({ favorites, onToggleFavorite }) {
+  const [posts, setPosts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [search, setSearch] = useState("");
+  const [sortOrder, setSortOrder] = useState("desc");
+
+  async function fetchPosts() {
+    try {
+      setLoading(true);
+      setError(null);
+      const res = await fetch("https://jsonplaceholder.typicode.com/posts");
+      if (!res.ok) throw new Error("ดึงข้อมูลไม่สำเร็จ");
+      const data = await res.json();
+      setPosts(data.slice(0, 20));
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    fetchPosts();
+  }, []);
 
   const filtered = posts.filter((post) =>
-    post.title?.toLowerCase().includes(search.toLowerCase()),
+    post.title.toLowerCase().includes(search.toLowerCase()),
   );
+
+  const sortedPosts = [...filtered].sort((a, b) => {
+    return sortOrder === "desc" ? b.id - a.id : a.id - b.id;
+  });
+
+  if (error)
+    return (
+      <div style={{ color: "red", textAlign: "center" }}>Error: {error}</div>
+    );
 
   return (
     <div>
-      <h2
+      {/* ⭐ ส่วนที่ 1: หัวข้อและปุ่ม (ส่วนนี้จะแสดงตลอดเวลา ไม่หายไปไหน) */}
+      <div
         style={{
-          color: "#2d3748",
-          borderBottom: "2px solid #1e40af",
-          paddingBottom: "0.5rem",
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          marginBottom: "1rem",
+          gap: "8px",
         }}
       >
-        โพสต์ล่าสุด
-      </h2>
+        <h2
+          style={{
+            color: "#2d3748",
+            borderBottom: "2px solid #1e40af",
+            paddingBottom: "0.5rem",
+            margin: 0,
+          }}
+        >
+          โพสต์ล่าสุด
+        </h2>
 
-      <PostCount count={filtered.length} />
+        <div style={{ display: "flex", gap: "0.5rem", flexShrink: 0 }}>
+          <button
+            onClick={fetchPosts}
+            disabled={loading}
+            style={{
+              background: "white",
+              border: "1px solid #cbd5e0",
+              padding: "0.3rem 0.6rem",
+              borderRadius: "4px",
+              cursor: loading ? "not-allowed" : "pointer",
+              fontSize: "0.85rem",
+            }}
+          >
+            {loading ? "⌛ โหลดอยู่..." : "🔄 โหลดใหม่"}
+          </button>
+
+          <button
+            onClick={() => setSortOrder(sortOrder === "desc" ? "asc" : "desc")}
+            style={{
+              background: "#edf2f7",
+              border: "1px solid #cbd5e0",
+              padding: "0.3rem 0.6rem",
+              borderRadius: "4px",
+              cursor: "pointer",
+              fontSize: "0.85rem",
+              color: "#1e40af",
+            }}
+          >
+            {sortOrder === "desc" ? "🔽 ใหม่สุดก่อน" : "🔼 เก่าสุดก่อน"}
+          </button>
+        </div>
+      </div>
+
+      <PostCount count={posts.length} />
 
       <input
         type="text"
@@ -39,33 +107,31 @@ function PostList({ posts, favorites, onToggleFavorite }) {
         onChange={(e) => setSearch(e.target.value)}
         style={{
           width: "100%",
-          padding: "0.5rem 0.75rem",
-          border: "1px solid #cbd5e0",
+          padding: "0.5rem",
           borderRadius: "6px",
-          fontSize: "1rem",
           marginBottom: "1rem",
+          border: "1px solid #cbd5e0",
           boxSizing: "border-box",
         }}
       />
 
-      {/* Logic ลำดับการแสดงผล: Skeleton -> Not Found -> List */}
-      {posts.length === 0 ? (
-        <PostSkeleton />
-      ) : filtered.length === 0 ? (
-        <p style={{ color: "#718096", textAlign: "center", padding: "2rem" }}>
-          ไม่พบโพสต์ที่ค้นหา
-        </p>
-      ) : (
-        filtered.map((post) => (
-          <PostCard
-            key={post.id}
-            title={post.title}
-            body={post.body}
-            isFavorite={favorites.includes(post.id)}
-            onToggleFavorite={() => onToggleFavorite(post.id)}
-          />
-        ))
-      )}
+      {/* ⭐ ส่วนที่ 2: เนื้อหา (ย้าย if loading มาเช็คเฉพาะส่วนนี้) */}
+      <div>
+        {loading ? (
+          <PostSkeleton /> // แสดงสีเทาๆ เฉพาะตรงนี้ หัวข้อข้างบนจะไม่หายแล้ว!
+        ) : sortedPosts.length === 0 ? (
+          <p style={{ textAlign: "center", color: "#718096" }}>ไม่พบโพสต์</p>
+        ) : (
+          sortedPosts.map((post) => (
+            <PostCard
+              key={post.id}
+              post={post}
+              isFavorite={favorites.includes(post.id)}
+              onToggleFavorite={() => onToggleFavorite(post.id)}
+            />
+          ))
+        )}
+      </div>
     </div>
   );
 }
